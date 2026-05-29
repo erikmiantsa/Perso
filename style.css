@@ -1,0 +1,187 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
+body {
+    margin: 0;
+    padding: 20px;
+    font-family: 'Montserrat', sans-serif;
+    background: #081028;
+    color: #ffffff;
+}
+
+/* =====================
+   CONTAINER
+===================== */
+.container {
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* =====================
+   TITLES
+===================== */
+h1 {
+    text-align: center;
+    font-weight: 500;
+    margin-bottom: 30px;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+h2 {
+    font-weight: 400;
+    margin-bottom: 15px;
+    color: #ffffff;
+}
+
+/* small accent only when needed */
+h1 span,
+h2 span {
+    color: #eca900;
+}
+
+/* =====================
+   CARD
+===================== */
+.card {
+    background: #0f1a33;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* =====================
+   INPUTS
+===================== */
+input {
+    padding: 10px 12px;
+    margin: 5px;
+    width: 220px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: #0b1430;
+    color: white;
+    outline: none;
+    transition: 0.2s;
+    font-family: 'Montserrat', sans-serif;
+}
+
+input:focus {
+    border-color: rgba(236, 169, 0, 0.6);
+    box-shadow: 0 0 0 2px rgba(236, 169, 0, 0.15);
+}
+
+/* =====================
+   BUTTONS
+===================== */
+button {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #2b3a67;
+    color: #ffffff;
+    font-weight: 300;
+    transition: 0.2s;
+    margin: 5px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    opacity: 0.95;
+}
+
+/* PRIMARY ACTION (only important buttons) */
+button.primary {
+    background: #eca900;
+    color: #081028;
+}
+
+/* DISABLED */
+button:disabled {
+    background: #2a2f45;
+    color: #7a8199;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* =====================
+   TABLE
+===================== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th {
+    text-align: left;
+    padding: 12px;
+    color: #9aa4c7;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    font-weight: 200;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    color: #e6e6e6;
+}
+
+/* =====================
+   STATUS
+===================== */
+.expired {
+    color: #ff5c5c;
+    font-weight: 400;
+}
+
+.active {
+    color: #3ddc97;
+    font-weight: 400;
+}
+
+/* =====================
+   TOAST
+===================== */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    color: white;
+    background: #333;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 9999;
+    font-weight: 500;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast.success {
+    background: #2ecc71;
+}
+
+.toast.error {
+    background: #e74c3c;
+}
+
+/* =====================
+   MICRO POLISH
+===================== */
+::selection {
+    background: rgba(236, 169, 0, 0.25);
+    color: #ffffff;
+}

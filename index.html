@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Shift Management</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="toast" class="toast"></div>
+
+    <div class="container">
+
+        <h1>Driver Shift Management</h1>
+
+        <!-- ADD DRIVER -->
+        <div class="card">
+            <h2>Add Driver</h2>
+
+            <input type="text" id="name" placeholder="Driver Name">
+            <input type="text" id="phone" placeholder="Phone">
+            <input type="text" id="vehicle" placeholder="Vehicle">
+            <input type="date" id="medical">
+
+            <button onclick="addDriver()">Add Driver</button>
+        </div>
+
+        <!-- DRIVERS -->
+        <div class="card">
+            <h2>Drivers</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Vehicle</th>
+                        <th>Medical Expiration</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="driverTable"></tbody>
+            </table>
+        </div>
+
+        <!-- EXPORT -->
+        <div class="card">
+            <h2>Export Shifts</h2>
+
+            <input type="date" id="startDate">
+            <input type="date" id="endDate">
+
+            <button onclick="exportCSV()">Export CSV</button>
+        </div>
+
+        <!-- HISTORY -->
+        <div class="card">
+            <h2>Shift History</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Driver</th>
+                        <th>Shift Start</th>
+                        <th>Shift End</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody id="shiftTable"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+
+</body>
+</html>
