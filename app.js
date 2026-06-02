@@ -138,17 +138,32 @@ function showToast(msg, type) {
 }
 
 // =====================
-// FORMATAGE DATES/DURÉE
+// FORMATAGE DATES / HEURES (UTC+3)
 // =====================
+
 function formatDate(d) {
   if (!d) return '—';
   var dt = new Date(d);
-  return isNaN(dt) ? '—' : dt.toLocaleDateString('fr-FR');
+  if (isNaN(dt)) return '—';
+
+  return new Intl.DateTimeFormat('fr-FR', {
+    timeZone: 'Etc/GMT-3', // UTC+3
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(dt);
 }
+
 function formatTime(d) {
   if (!d) return '—';
   var dt = new Date(d);
-  return isNaN(dt) ? '—' : dt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  if (isNaN(dt)) return '—';
+
+  return new Intl.DateTimeFormat('fr-FR', {
+    timeZone: 'Etc/GMT-3', // UTC+3
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(dt);
 }
 function formatDuration(ms) {
   if (!ms || isNaN(ms)) return '—';
