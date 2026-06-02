@@ -1,85 +1,261 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Shift Management</title>
-
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Driver Shift Management</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="logo.png" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 </head>
-
 <body>
 
-    <div id="toast" class="toast"></div>
+<div id="toast" class="toast"></div>
 
-    <div class="container">
+<!-- ============================================================ -->
+<!-- MODAL — FICHE CHAUFFEUR                                       -->
+<!-- ============================================================ -->
+<div id="modalOverlay" class="modal-overlay hidden">
+  <div class="modal-box" id="modalContent"></div>
+</div>
 
-        <h1>Driver Shift Management</h1>
-
-        <!-- ADD DRIVER -->
-        <div class="card">
-            <h2>Add Driver</h2>
-
-            <input type="text" id="name" placeholder="Driver Name">
-            <input type="text" id="phone" placeholder="Phone">
-            <input type="text" id="vehicle" placeholder="Vehicle">
-            <input type="date" id="medical">
-
-            <button onclick="addDriver()">Add Driver</button>
-        </div>
-
-        <!-- DRIVERS -->
-        <div class="card">
-            <h2>Drivers</h2>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Phone</th>
-                        <th>Vehicle</th>
-                        <th>Medical Expiration</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-
-                <tbody id="driverTable"></tbody>
-            </table>
-        </div>
-
-        <!-- EXPORT -->
-        <div class="card">
-            <h2>Export Shifts</h2>
-
-            <input type="date" id="startDate">
-            <input type="date" id="endDate">
-
-            <button onclick="exportCSV()">Export CSV</button>
-        </div>
-
-        <!-- HISTORY -->
-        <div class="card">
-            <h2>Shift History</h2>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Driver</th>
-                        <th>Shift Start</th>
-                        <th>Shift End</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-
-                <tbody id="shiftTable"></tbody>
-            </table>
-        </div>
-
+<!-- ============================================================ -->
+<!-- MODAL — MISE À JOUR DATE MÉDICALE                             -->
+<!-- ============================================================ -->
+<div id="medicalOverlay" class="modal-overlay hidden" onclick="if(event.target===this)closeMedicalModal()">
+  <div class="mini-modal">
+    <div class="mini-modal-header">
+      <div>
+        <div class="mini-modal-icon">🗓</div>
+        <h3 id="medicalModalTitle">Mise à jour médicale</h3>
+        <p id="medicalModalSub" class="mini-modal-sub">Chauffeur</p>
+      </div>
+      <button class="btn-close" onclick="closeMedicalModal()">✕</button>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js"></script>
+    <div class="mini-modal-body">
+      <label class="form-label">Ancienne date</label>
+      <div id="medicalOldDate" class="mini-modal-old-date">—</div>
 
+      <label class="form-label" style="margin-top:18px;">Nouvelle date d'expiration *</label>
+      <input id="medicalNewDate" type="date" class="mini-modal-date-input" />
+
+      <div class="mini-modal-actions">
+        <button class="mini-modal-cancel" onclick="closeMedicalModal()">Annuler</button>
+        <button class="primary mini-modal-confirm" onclick="confirmMedical()">✓ Confirmer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- LOGIN                                                         -->
+<!-- ============================================================ -->
+<div id="loginPage" class="login-page">
+  <div class="login-box">
+    <img src="logo.png" alt="Driver Shift" class="login-logo" />
+    <h1>Driver Shift Management</h1>
+    <p class="login-subtitle">Connectez-vous pour continuer</p>
+    <input id="loginEmail"    type="email"    placeholder="Email"          autocomplete="username" />
+    <input id="loginPassword" type="password" placeholder="Mot de passe"  autocomplete="current-password" />
+    <button class="login-submit primary" onclick="login()">Se connecter</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- APP                                                           -->
+<!-- ============================================================ -->
+<div id="appPage" class="app-page hidden">
+
+  <!-- SIDEBAR GAUCHE -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="logo.png" alt="Driver Shift" class="logo-image" />
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" onclick="showSection('dashboard', this)">
+        <span class="nav-icon">📊</span> Dashboard
+      </button>
+      <button class="nav-item" onclick="showSection('drivers', this)">
+        <span class="nav-icon">👥</span> Chauffeurs
+      </button>
+      <button class="nav-item" onclick="showSection('shifts', this)">
+        <span class="nav-icon">📋</span> Historique shifts
+      </button>
+      <button class="nav-item admin-only hidden" onclick="showSection('addDriver', this)">
+        <span class="nav-icon">➕</span> Ajouter chauffeur
+      </button>
+      <button class="nav-item admin-only hidden" onclick="showSection('suspended', this)">
+        <span class="nav-icon">⏸</span> Suspendus
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div id="userInfo" class="user-info">—</div>
+      <button class="logout-btn" onclick="logout()">⬅ Déconnexion</button>
+    </div>
+  </aside>
+
+  <!-- CONTENU PRINCIPAL -->
+  <main class="main-content">
+
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="section">
+      <div class="section-header">
+        <h2>📊 Dashboard</h2>
+        <span class="section-count live">● LIVE</span>
+      </div>
+      <div class="dashboard-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon">👥</div>
+          <div class="kpi-body"><div class="kpi-val" id="kpiTotalDrivers">—</div><div class="kpi-lbl">Chauffeurs actifs</div></div>
+        </div>
+        <div class="kpi-card kpi-success">
+          <div class="kpi-icon">🟢</div>
+          <div class="kpi-body"><div class="kpi-val" id="kpiOnShift">—</div><div class="kpi-lbl">En service</div></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">⚫</div>
+          <div class="kpi-body"><div class="kpi-val" id="kpiOffShift">—</div><div class="kpi-lbl">Hors service</div></div>
+        </div>
+        <div class="kpi-card kpi-danger">
+          <div class="kpi-icon">🔴</div>
+          <div class="kpi-body"><div class="kpi-val" id="kpiMedExpired">—</div><div class="kpi-lbl">Médical expiré</div></div>
+        </div>
+        <div class="kpi-card kpi-warning">
+          <div class="kpi-icon">🟡</div>
+          <div class="kpi-body"><div class="kpi-val" id="kpiMedSoon">—</div><div class="kpi-lbl">Expire &lt; 30j</div></div>
+        </div>
+        <div class="kpi-card kpi-info">
+          <div class="kpi-icon">📋</div>
+          <div class="kpi-body"><div class="kpi-val" id="kpiTotalShifts">—</div><div class="kpi-lbl">Total shifts</div></div>
+        </div>
+        <div class="kpi-card kpi-warning">
+          <div class="kpi-icon">⏸</div>
+          <div class="kpi-body"><div class="kpi-val" id="kpiSuspended">—</div><div class="kpi-lbl">Suspendus</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHAUFFEURS -->
+    <section id="drivers" class="section hidden">
+      <div class="section-header">
+        <h2>👥 Chauffeurs</h2>
+        <span class="section-count" id="driversCount">—</span>
+      </div>
+      <div class="search-bar">
+        <input id="driverSearch" type="text" placeholder="🔎 Rechercher par nom, téléphone, matricule..." oninput="handleSearch()" />
+        <button class="btn-fiche" onclick="clearSearch()">✕ Effacer</button>
+      </div>
+      <div class="card table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Téléphone</th>
+              <th>Matricule</th>
+              <th>Exp. Médicale</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="driverTable"></tbody>
+        </table>
+      </div>
+      <div id="driversPagination"></div>
+    </section>
+
+    <!-- HISTORIQUE SHIFTS -->
+    <section id="shifts" class="section hidden">
+      <div class="section-header">
+        <h2>📋 Historique des shifts</h2>
+        <span class="section-count" id="shiftsCount">—</span>
+      </div>
+      <div class="card table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Chauffeur</th>
+              <th>Date début</th>
+              <th>Heure début</th>
+              <th>Date fin</th>
+              <th>Heure fin</th>
+              <th>Durée</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody id="shiftTable"></tbody>
+        </table>
+      </div>
+      <div id="shiftsPagination"></div>
+    </section>
+
+    <!-- AJOUTER CHAUFFEUR (admin) -->
+    <section id="addDriver" class="section hidden">
+      <div class="section-header">
+        <h2>➕ Ajouter un chauffeur</h2>
+      </div>
+      <div class="card add-form-card">
+        <label class="form-label">Nom complet *</label>
+        <input id="name"       type="text" placeholder="Ex : Jean Dupont" />
+        <label class="form-label">Téléphone</label>
+        <input id="phone"      type="text" placeholder="Ex : 0612345678" />
+        <label class="form-label">Matricule *</label>
+        <input id="matricule"  type="text" placeholder="Ex : M-001" />
+        <label class="form-label">Expiration médicale *</label>
+        <input id="medical"    type="date" />
+        <button class="primary add-submit-btn" onclick="addDriver()">✓ Enregistrer le chauffeur</button>
+      </div>
+    </section>
+
+    <!-- SUSPENDUS (admin) -->
+    <section id="suspended" class="section hidden">
+      <div class="section-header">
+        <h2>⏸ Chauffeurs suspendus</h2>
+        <span class="section-count" id="suspendedCount">—</span>
+      </div>
+      <div class="card table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Nom</th><th>Téléphone</th><th>Matricule</th>
+              <th>Exp. Médicale</th><th>Suspendu le</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="suspendedTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- PANNEAU DROIT — EXPORT -->
+  <aside class="right-panel">
+    <div class="export-title">📤 Export Shifts</div>
+
+    <label class="export-label">Date de début</label>
+    <input id="startDate" type="date" />
+    <label class="export-label">Date de fin</label>
+    <input id="endDate"   type="date" />
+
+    <button class="primary export-btn" onclick="exportShiftsPDF()">📄 Exporter PDF</button>
+    <button class="export-btn-csv export-btn" onclick="exportShiftsCSV()">📊 Exporter CSV</button>
+
+    <div class="legend-block">
+      <div class="export-title" style="margin-bottom:10px;">ℹ️ Légende</div>
+      <div class="shortcut-list">
+        <div>🟢 Shift actif / Médical OK</div>
+        <div>🟡 Médical expire &lt; 30j</div>
+        <div>🔴 Médical expiré</div>
+        <div>⏸ Chauffeur suspendu</div>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
