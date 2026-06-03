@@ -10,8 +10,9 @@ var client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 var PAGE_SIZE = 10;
 var driversState = { page: 0, total: 0, search: '' };
 var shiftsState  = { page: 0, total: 0 };
-var modalDriver  = null;
-var modalShifts  = [];
+var modalDriver      = null;
+var modalShifts      = [];
+var _selectedPeriod  = 'all'; // 'all' | 'month' | 'prev_month' | 'year' | 'prev_year'
 // Par défaut admin — sera mis à jour si la table profiles existe
 var currentUserRole = 'admin';
 // Flag pour savoir si la colonne status existe dans drivers
@@ -138,32 +139,17 @@ function showToast(msg, type) {
 }
 
 // =====================
-// FORMATAGE DATES / HEURES (UTC+3)
+// FORMATAGE DATES/DURÉE
 // =====================
-
 function formatDate(d) {
   if (!d) return '—';
   var dt = new Date(d);
-  if (isNaN(dt)) return '—';
-
-  return new Intl.DateTimeFormat('fr-FR', {
-    timeZone: 'Etc/GMT-3', // UTC+3
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  }).format(dt);
+  return isNaN(dt) ? '—' : dt.toLocaleDateString('fr-FR');
 }
-
 function formatTime(d) {
   if (!d) return '—';
   var dt = new Date(d);
-  if (isNaN(dt)) return '—';
-
-  return new Intl.DateTimeFormat('fr-FR', {
-    timeZone: 'Etc/GMT-3', // UTC+3
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(dt);
+  return isNaN(dt) ? '—' : dt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 }
 function formatDuration(ms) {
   if (!ms || isNaN(ms)) return '—';
@@ -386,10 +372,10 @@ function renderDriverTable(result) {
         var ficheBtn   = '<button class="btn-fiche" onclick="openDriverModal(\'' + sid + '\')">📄 Fiche</button>';
         var medBtn     = isAdmin ? '<button onclick="updateMedical(\'' + sid + '\')">🗓 Médical</button>' : '';
         var suspBtn    = isAdmin
-          ? '<button style="background:rgba(245,176,65,0.15);color:#f5b041;border:1px solid rgba(245,176,65,0.3);" onclick="suspendDriver(\'' + sid + '\',\'' + sname + '\')">⏸ Suspendre</button>'
+          ? '<button class="icon-btn icon-suspend" title="Suspendre ce chauffeur" onclick="suspendDriver(\'' + sid + '\',\'' + sname + '\')">⏸</button>'
           : '';
         var delBtn     = isAdmin
-          ? '<button style="background:rgba(255,92,92,0.15);color:#ff5c5c;border:1px solid rgba(255,92,92,0.3);" onclick="deleteDriver(\'' + sid + '\',\'' + sname + '\')">🗑 Supprimer</button>'
+          ? '<button class="icon-btn icon-delete" title="Supprimer définitivement" onclick="deleteDriver(\'' + sid + '\',\'' + sname + '\')">🗑</button>'
           : '';
 
         var tr = document.createElement('tr');
@@ -681,6 +667,8 @@ function openDriverModal(driverId) {
         '</tr>';
     }).join('') : '<tr><td colspan="6" class="empty-row">Aucun shift enregistré</td></tr>';
 
+    _selectedPeriod = 'all'; // reset à chaque ouverture
+
     content.innerHTML =
       '<div class="modal-header">' +
         '<div class="modal-title-block">' +
@@ -688,11 +676,27 @@ function openDriverModal(driverId) {
           '<span class="modal-matricule">Matricule : ' + escHtml(driver.matricule || 'non renseigné') + '</span>' +
         '</div>' +
         '<div class="modal-header-actions">' +
-          '<button class="primary" onclick="downloadDriverPDF()">📄 PDF</button>' +
-          '<button class="btn-fiche" onclick="downloadDriverExcel()">📊 Excel</button>' +
           '<button class="btn-close" onclick="closeModal()">✕</button>' +
         '</div>' +
       '</div>' +
+
+      // ── Sélecteur de période ──
+      '<div class="period-bar">' +
+        '<span class="period-bar-label">📅 Période export :</span>' +
+        '<div class="period-pills">' +
+          '<button class="period-pill active"  data-period="all"        onclick="selectPeriod(this)">Tout</button>' +
+          '<button class="period-pill"          data-period="month"      onclick="selectPeriod(this)">Ce mois</button>' +
+          '<button class="period-pill"          data-period="prev_month" onclick="selectPeriod(this)">Mois préc.</button>' +
+          '<button class="period-pill"          data-period="year"       onclick="selectPeriod(this)">Cette année</button>' +
+          '<button class="period-pill"          data-period="prev_year"  onclick="selectPeriod(this)">Année préc.</button>' +
+        '</div>' +
+        '<span class="period-count" id="periodShiftCount">' + shifts.length + ' shift' + (shifts.length > 1 ? 's' : '') + '</span>' +
+        '<div class="period-download-btns">' +
+          '<button class="primary period-dl-btn" onclick="downloadDriverPDF()">📄 PDF</button>' +
+          '<button class="btn-fiche period-dl-btn" onclick="downloadDriverExcel()">📊 Excel</button>' +
+        '</div>' +
+      '</div>' +
+
       '<div class="modal-stats">' +
         _stat(escHtml(driver.phone || '—'), 'Téléphone', '') +
         _stat(escHtml(driver.medical_expiration), expired ? '⚠️ Expiré' : '✅ Valide', expired ? 'stat-danger' : 'stat-ok') +
@@ -719,6 +723,53 @@ function _stat(val, lbl, cls) {
   return '<div class="stat-card ' + cls + '"><span class="stat-val">' + val + '</span><span class="stat-lbl">' + lbl + '</span></div>';
 }
 
+// =====================
+// FILTRE DE PÉRIODE
+// =====================
+function selectPeriod(btn) {
+  _selectedPeriod = btn.getAttribute('data-period');
+  document.querySelectorAll('.period-pill').forEach(function (b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+
+  var filtered = filterShiftsByPeriod(modalShifts, _selectedPeriod);
+  var el = document.getElementById('periodShiftCount');
+  if (el) el.textContent = filtered.length + ' shift' + (filtered.length > 1 ? 's' : '');
+}
+
+function filterShiftsByPeriod(shifts, period) {
+  if (period === 'all') return shifts;
+  var now   = new Date();
+  var start, end;
+  if (period === 'month') {
+    start = new Date(now.getFullYear(), now.getMonth(), 1);
+    end   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+  } else if (period === 'prev_month') {
+    start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    end   = new Date(now.getFullYear(), now.getMonth(),     0, 23, 59, 59);
+  } else if (period === 'year') {
+    start = new Date(now.getFullYear(), 0,  1);
+    end   = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
+  } else if (period === 'prev_year') {
+    start = new Date(now.getFullYear() - 1, 0,  1);
+    end   = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59);
+  }
+  return shifts.filter(function (s) {
+    var d = new Date(s.shift_start);
+    return d >= start && d <= end;
+  });
+}
+
+function periodLabel() {
+  var labels = {
+    all:        'Tous les shifts',
+    month:      'Ce mois',
+    prev_month: 'Mois précédent',
+    year:       'Cette année',
+    prev_year:  'Année précédente'
+  };
+  return labels[_selectedPeriod] || 'Tous les shifts';
+}
+
 function closeModal() {
   document.getElementById('modalOverlay').classList.add('hidden');
   document.body.style.overflow = '';
@@ -728,8 +779,9 @@ function closeModal() {
 // PDF — FICHE CHAUFFEUR
 // =====================
 function downloadDriverPDF() {
-  var driver = modalDriver; var shifts = modalShifts;
+  var driver = modalDriver;
   if (!driver) return;
+  var shifts = filterShiftsByPeriod(modalShifts, _selectedPeriod); // ← filtré par période
 
   var jsPDF  = window.jspdf.jsPDF;
   var doc    = new jsPDF();
@@ -753,7 +805,8 @@ function downloadDriverPDF() {
       ['Matricule',           driver.matricule || '—'],
       ['Expiration médicale', driver.medical_expiration],
       ['Enregistré le',       formatDate(driver.created_at)],
-      ['Total shifts',        shifts.length],
+      ['Période',             periodLabel()],
+      ['Shifts inclus',       shifts.length],
       ['Heures travaillées',  totalH + 'h']
     ],
     theme: 'plain',
@@ -764,7 +817,7 @@ function downloadDriverPDF() {
   var y = doc.lastAutoTable.finalY + 8;
   doc.setFillColor(236,169,0); doc.rect(14,y,182,12,'F');
   doc.setTextColor(8,16,40); doc.setFontSize(9);
-  doc.text('Rapport généré le ' + new Date().toLocaleString('fr-FR'), 19, y+8);
+  doc.text('Rapport généré le ' + new Date().toLocaleString('fr-FR') + '  —  ' + periodLabel(), 19, y+8);
 
   var rows = shifts.map(function (s) {
     var dur = s.shift_end ? Math.round((new Date(s.shift_end)-new Date(s.shift_start))/60000)+' min' : '—';
@@ -775,13 +828,13 @@ function downloadDriverPDF() {
   doc.autoTable({
     startY: y + 18,
     head: [['Date deb.','Heure deb.','Date fin','Heure fin','Durée','Statut']],
-    body: rows,
+    body: rows.length ? rows : [['—','—','—','—','—','Aucun shift']],
     theme: 'striped',
     headStyles: { fillColor:[236,169,0], textColor:[8,16,40], fontStyle:'bold' },
     styles: { fontSize:8, cellPadding:2 }
   });
 
-  doc.save('fiche_' + driver.full_name.replace(/\s+/g,'_') + '_' + new Date().toISOString().slice(0,10) + '.pdf');
+  doc.save('fiche_' + driver.full_name.replace(/\s+/g,'_') + '_' + periodLabel().replace(/\s+/g,'_') + '.pdf');
   showToast('PDF téléchargé ✓', 'success');
 }
 
@@ -789,10 +842,11 @@ function downloadDriverPDF() {
 // EXCEL — FICHE CHAUFFEUR
 // =====================
 function downloadDriverExcel() {
-  var driver = modalDriver; var shifts = modalShifts;
+  var driver = modalDriver;
   if (!driver) return;
+  var shifts = filterShiftsByPeriod(modalShifts, _selectedPeriod); // ← filtré par période
 
-  var wb   = XLSX.utils.book_new();
+  var wb     = XLSX.utils.book_new();
   var endedS = shifts.filter(function (s) { return s.shift_end; });
   var totalH = (endedS.reduce(function (a,s) {
     return a + (new Date(s.shift_end)-new Date(s.shift_start))/3600000;
@@ -804,7 +858,8 @@ function downloadDriverExcel() {
     { Champ:'Matricule',          Valeur: driver.matricule || '' },
     { Champ:'Expiration médicale',Valeur: driver.medical_expiration },
     { Champ:'Enregistré le',      Valeur: formatDate(driver.created_at) },
-    { Champ:'Total shifts',       Valeur: shifts.length },
+    { Champ:'Période',            Valeur: periodLabel() },
+    { Champ:'Shifts inclus',      Valeur: shifts.length },
     { Champ:'Heures travaillées', Valeur: totalH + 'h' }
   ]);
   ws1['!cols'] = [{wch:26},{wch:32}];
@@ -819,13 +874,13 @@ function downloadDriverExcel() {
       'Durée (min)': s.shift_end ? Math.round((new Date(s.shift_end)-new Date(s.shift_start))/60000) : '',
       'Statut':      s.status
     };
-  }) : [{ Info:'Aucun shift enregistré' }];
+  }) : [{ Info:'Aucun shift pour cette période' }];
 
   var ws2 = XLSX.utils.json_to_sheet(rows);
   ws2['!cols'] = [{wch:12},{wch:10},{wch:12},{wch:10},{wch:12},{wch:10}];
   XLSX.utils.book_append_sheet(wb, ws2, 'Shifts');
 
-  XLSX.writeFile(wb, 'fiche_' + driver.full_name.replace(/\s+/g,'_') + '.xlsx');
+  XLSX.writeFile(wb, 'fiche_' + driver.full_name.replace(/\s+/g,'_') + '_' + periodLabel().replace(/\s+/g,'_') + '.xlsx');
   showToast('Excel téléchargé ✓', 'success');
 }
 
