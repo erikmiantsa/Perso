@@ -1063,6 +1063,10 @@ function loadShifts(page) {
         tbody.innerHTML = '<tr><td colspan="7" class="empty-row">Aucun shift enregistré</td></tr>';
       } else {
         data.forEach(function (shift) {
+console.log("Raw:", shift.shift_start);
+  console.log("Date:", new Date(shift.shift_start));
+  console.log("ISO:", new Date(shift.shift_start).toISOString());
+          
           var hasEnd = !!shift.shift_end;
           // formatDate / formatTime → APP_TIMEZONE (UTC+3)
           var dur = hasEnd ? formatDuration(new Date(shift.shift_end) - new Date(shift.shift_start)) : '—';
