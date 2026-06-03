@@ -848,3 +848,122 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   font-size: 13px;
   border-radius: 8px;
 }
+
+/* ============================
+   BOUTONS ICÔNE SEULEMENT
+   (⏸ Suspendre / 🗑 Supprimer)
+============================ */
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  margin: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  font-size: 15px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: 0.15s;
+  vertical-align: middle;
+}
+
+.icon-suspend {
+  background: rgba(245,176,65,0.12);
+  color: #f5b041;
+  border-color: rgba(245,176,65,0.28);
+}
+.icon-suspend:hover {
+  background: rgba(245,176,65,0.25) !important;
+  transform: translateY(-1px);
+  opacity: 1;
+}
+
+.icon-delete {
+  background: rgba(255,92,92,0.12);
+  color: #ff5c5c;
+  border-color: rgba(255,92,92,0.28);
+}
+.icon-delete:hover {
+  background: rgba(255,92,92,0.25) !important;
+  transform: translateY(-1px);
+  opacity: 1;
+}
+
+/* ============================
+   BARRE DE PÉRIODE — MODAL FICHE
+============================ */
+.period-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px 24px;
+  background: rgba(0,0,0,0.2);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.period-bar-label {
+  font-size: 12px;
+  color: #9aa4c7;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.period-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.period-pill {
+  padding: 5px 12px;
+  margin: 0;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #9aa4c7;
+  cursor: pointer;
+  transition: 0.15s;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.period-pill:hover:not(.active) {
+  background: rgba(255,255,255,0.1) !important;
+  color: #fff;
+  transform: none;
+  opacity: 1;
+}
+
+.period-pill.active {
+  background: rgba(236,169,0,0.18) !important;
+  border-color: rgba(236,169,0,0.5);
+  color: #eca900;
+  transform: none;
+}
+
+.period-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: #eca900;
+  white-space: nowrap;
+  background: rgba(236,169,0,0.1);
+  border: 1px solid rgba(236,169,0,0.2);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.period-download-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.period-dl-btn {
+  padding: 7px 14px !important;
+  margin: 0 !important;
+  font-size: 12px !important;
+}
