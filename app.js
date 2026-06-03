@@ -1213,7 +1213,4 @@ function exportShiftsCSV() {
     showToast('CSV exporté ✓', 'success');
  
   });
-console.log("Raw:", shift.shift_start);
-console.log("Date:", new Date(shift.shift_start));
-console.log("ISO:", new Date(shift.shift_start).toISOString());
 }
