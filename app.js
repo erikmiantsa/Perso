@@ -445,6 +445,11 @@ function afterAddDriver() {
 // =====================
 // SHIFTS
 // =====================
+function formatLocalTime(dateString) {
+  return new Date(dateString).toLocaleString('fr-FR', {
+    timeZone: 'Indian/Antananarivo'
+  });
+}
 function getActiveShift(driverId) {
   return client.from('shifts').select('*')
     .eq('driver_id', driverId).is('shift_end', null).maybeSingle()
