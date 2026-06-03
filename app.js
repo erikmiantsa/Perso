@@ -139,68 +139,29 @@ function showToast(msg, type) {
 }
 
 // =====================
-// FORMATAGE DATES/DURÉE (UTC+3 Madagascar)
+// FORMATAGE DATES/DURÉE
 // =====================
-
-var APP_TIMEZONE = 'Indian/Antananarivo';
-
 function formatDate(d) {
   if (!d) return '—';
-
   var dt = new Date(d);
-
-  if (isNaN(dt)) return '—';
-
-  return dt.toLocaleDateString('fr-FR', {
-    timeZone: APP_TIMEZONE
-  });
+  return isNaN(dt) ? '—' : dt.toLocaleDateString('fr-FR');
 }
-
 function formatTime(d) {
   if (!d) return '—';
-
   var dt = new Date(d);
-
-  if (isNaN(dt)) return '—';
-
-  return dt.toLocaleTimeString('fr-FR', {
-    timeZone: APP_TIMEZONE,
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  });
+  return isNaN(dt) ? '—' : dt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 }
-
-function formatDateTime(d) {
-  if (!d) return '—';
-
-  var dt = new Date(d);
-
-  if (isNaN(dt)) return '—';
-
-  return dt.toLocaleString('fr-FR', {
-    timeZone: APP_TIMEZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  });
-}
-
 function formatDuration(ms) {
   if (!ms || isNaN(ms)) return '—';
-
   var m = Math.round(ms / 60000);
   var h = Math.floor(m / 60);
   var min = m % 60;
-
-  return h > 0
-    ? h + 'h' + (min < 10 ? '0' : '') + min
-    : m + ' min';
+  return h > 0 ? h + 'h' + (min < 10 ? '0' : '') + min : m + ' min';
+}
+function escHtml(t) {
+  if (t == null) return '';
+  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                  .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
 }
 
 // =====================
