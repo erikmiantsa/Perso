@@ -173,6 +173,10 @@
         <h2>📋 Historique des shifts</h2>
         <span class="section-count" id="shiftsCount">—</span>
       </div>
+      <div class="search-bar">
+        <input id="driverSearch" type="text" placeholder="🔎 Rechercher par nom, Email, matricule..." oninput="handleSearch()" />
+        <button class="btn-fiche" onclick="clearSearch()">✕ Effacer</button>
+      </div>
       <div class="card table-card">
         <table>
           <thead>
