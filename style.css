@@ -967,3 +967,36 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   margin: 0 !important;
   font-size: 12px !important;
 }
+.layout {
+  display: flex;
+}
+
+/* MENU GAUCHE */
+.side-menu {
+  width: 80px;
+  height: 100vh;
+  background: #081028;
+}
+
+/* PANEL DROITE caché par défaut */
+.right-panel {
+  position: fixed;
+  left: 80px;
+  top: 0;
+  width: 320px;
+  height: 100vh;
+  background: #0f1a33;
+  color: white;
+
+  transform: translateX(-100%);
+  transition: 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 👉 HOVER SUR MENU */
+.side-menu:hover + .right-panel {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
