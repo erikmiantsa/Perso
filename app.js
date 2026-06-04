@@ -809,7 +809,7 @@ function openDriverModal(driverId) {
       '</div>' +
 
       '<div class="modal-stats">' +
-        _stat(escHtml(driver.phone || '—'),        'Téléphone', '') +
+        _stat(escHtml(driver.phone || '—'),        'Email', '') +
         _stat(escHtml(driver.medical_expiration),  expired ? '⚠️ Expiré' : '✅ Valide', expired ? 'stat-danger' : 'stat-ok') +
         _stat(activeShift ? 'ON SHIFT' : 'OFF SHIFT', 'Statut', activeShift ? 'stat-on' : '') +
         _stat(shifts.length,                       'Total shifts', '') +
@@ -1032,7 +1032,7 @@ function downloadDriverPDF() {
 
       body: [
         ['Matricule', driver.matricule || '—'],
-        ['Téléphone', driver.phone || '—'],
+        ['Email', driver.phone || '—'],
         ['Expiration médicale', driver.medical_expiration || '—'],
         ['Période', periodLabel()],
         ['Shifts', shifts.length],
@@ -1212,7 +1212,7 @@ function downloadDriverExcel() {
 
   var ws1 = XLSX.utils.json_to_sheet([
     { Champ: 'Nom complet',          Valeur: driver.full_name },
-    { Champ: 'Téléphone',            Valeur: driver.phone || '' },
+    { Champ: 'Email',            Valeur: driver.phone || '' },
     { Champ: 'Matricule',            Valeur: driver.matricule || '' },
     { Champ: 'Expiration médicale',  Valeur: driver.medical_expiration },
     // formatDate → APP_TIMEZONE
