@@ -939,7 +939,7 @@ var totalH = totalHours + 'h ' + remainingMinutes + 'min';
 doc.setTextColor(0, 0, 0);
 
 doc.autoTable({
-  startY: 45,
+  startY: 25,
   body: [
     ['Nom complet', driver.full_name],
     ['Téléphone', driver.phone || '—'],
@@ -968,11 +968,6 @@ doc.rect(14, y, 182, 12, 'F');
 doc.setTextColor(8, 16, 40);
 doc.setFontSize(9);
 
-doc.text(
-  'Rapport généré le ' + formatDateTime(new Date()) + ' — ' + periodLabel(),
-  19,
-  y + 8
-);
 
 var rows = shifts.map(function (s) {
 
@@ -1032,6 +1027,11 @@ doc.save(
   '_' +
   getLocalFileDate() +
   '.pdf'
+);
+  doc.text(
+  'Rapport généré le ' + formatDateTime(new Date()) + ' — ' + periodLabel(),
+  19,
+  y + 108
 );
 
 showToast('PDF téléchargé ✓', 'success');
