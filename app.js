@@ -988,7 +988,7 @@ function downloadDriverPDF() {
         ['Expiration médicale', driver.medical_expiration || '—'],
         ['Période', periodLabel()],
         ['Shifts', shifts.length],
-        
+        ],  
 
       theme: 'plain',
 
