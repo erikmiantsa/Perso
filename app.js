@@ -912,8 +912,6 @@ function closeModal() {
 // Nom de fichier   → getLocalFileDate() (pas toISOString)
 // =================================================================
 function downloadDriverPDF() {
- var driver = modalDriver;
-if (!driver) return;
 
 var shifts = filterShiftsByPeriod(modalShifts, _selectedPeriod);
 var jsPDF = window.jspdf.jsPDF;
