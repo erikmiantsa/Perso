@@ -911,7 +911,8 @@ function closeModal() {
 // Horodatage rapport → formatDateTime() (UTC+3 Madagascar)
 // Nom de fichier   → getLocalFileDate() (pas toISOString)
 // =================================================================
-function exportShiftPDF() {
+
+function downloadDriverPDF() {
 
   var img = new Image();
 
@@ -926,7 +927,7 @@ function exportShiftPDF() {
     var doc = new jsPDF();
 
     // ======================================================
-    // CALCUL TOTAL
+    // CALCUL TOTAL HEURES
     // ======================================================
 
     var endedS = shifts.filter(function (s) {
@@ -951,7 +952,7 @@ function exportShiftPDF() {
     doc.addImage(img, 'PNG', 14, 10, 22, 22);
 
     // ======================================================
-    // TITRE CENTRÉ
+    // TITRE
     // ======================================================
 
     doc.setTextColor(8, 16, 40);
@@ -972,7 +973,7 @@ function exportShiftPDF() {
     );
 
     // ======================================================
-    // BLOC RÉSUMÉ (CLEAN UI)
+    // BLOC RÉSUMÉ
     // ======================================================
 
     doc.setFillColor(245, 245, 245);
@@ -1021,7 +1022,7 @@ function exportShiftPDF() {
     );
 
     // ======================================================
-    // SEPARATEUR
+    // SÉPARATEUR
     // ======================================================
 
     var y = infoBottom + 14;
@@ -1096,7 +1097,7 @@ function exportShiftPDF() {
     });
 
     // ======================================================
-    // FOOTER PROPRE
+    // FOOTER
     // ======================================================
 
     var pageHeight = doc.internal.pageSize.height;
@@ -1128,28 +1129,25 @@ function exportShiftPDF() {
     // ======================================================
 
     var safeName = driver.full_name
-  .replace(/[^a-z0-9_\- ]/gi, '_')
-  .trim();
+      .replace(/[^a-z0-9_\- ]/gi, '_')
+      .trim();
 
-var fileName =
-  'fiche_' +
-  safeName +
-  '_' +
-  periodLabel().replace(/\s+/g, '_') +
-  '_' +
-  getLocalFileDate() +
-  '.pdf';
+    doc.save(
+      'fiche_' +
+      safeName +
+      '_' +
+      periodLabel().replace(/\s+/g, '_') +
+      '_' +
+      getLocalFileDate() +
+      '.pdf'
+    );
 
-// TOAST AVANT SAVE (plus fiable)
-showToast('Génération PDF en cours ✓', 'success');
+    showToast('PDF téléchargé ✓', 'success');
+  };
 
-// SAVE
-doc.save(fileName);
+  img.src = 'logo.png';
+}
 
-// TOAST FINAL (avec petit delay)
-setTimeout(function () {
-  showToast('PDF téléchargé ✓', 'success');
-}, 300);
 // =================================================================
 // EXCEL — FICHE CHAUFFEUR
 // Dates affichées → formatDate/formatTime (UTC+3 Madagascar)
