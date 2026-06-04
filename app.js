@@ -895,8 +895,25 @@ function _pad(n)       { return String(n).padStart(2, '0'); }
 function _lastDay(y,m) { return new Date(y, m, 0).getDate(); } // dernier jour du mois
 
 function periodLabel() {
-  return { all:'Tous les shifts', month:'Ce mois', prev_month:'Mois précédent',
-           year:'Cette année',    prev_year:'Année précédente' }[_selectedPeriod] || 'Tous les shifts';
+
+  var labels = {
+    all: 'Tous les shifts',
+    prev_month: 'Mois précédent',
+    year: 'Cette année',
+    prev_year: 'Année précédente'
+  };
+
+  if (_selectedPeriod === 'month') {
+    var months = [
+      'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+      'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    ];
+
+    var now = new Date();
+    return months[now.getMonth()];
+  }
+
+  return labels[_selectedPeriod] || 'Tous les shifts';
 }
 
 function closeModal() {
