@@ -997,7 +997,7 @@ function downloadDriverPDF() {
     // LOGO PIQLA
     // ======================================================
 
-    doc.addImage(img, 'PNG', 14, 10, 59, 22);
+    doc.addImage(img, 'PNG', 14, 10, 29, 15);
 
     // ======================================================
     // TITRE
@@ -1165,7 +1165,7 @@ function downloadDriverPDF() {
     );
 
     doc.text(
-      'Piqla Driver Management',
+      'Piqla',
       196,
       pageHeight - 8,
       { align: 'right' }
