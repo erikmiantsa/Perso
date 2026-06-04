@@ -911,240 +911,245 @@ function closeModal() {
 // Horodatage rapport → formatDateTime() (UTC+3 Madagascar)
 // Nom de fichier   → getLocalFileDate() (pas toISOString)
 // =================================================================
-var driver = modalDriver;
-if (!driver) return;
+function exportShiftPDF() {
 
-var shifts = filterShiftsByPeriod(modalShifts, _selectedPeriod);
+  var img = new Image();
 
-var jsPDF = window.jspdf.jsPDF;
-var doc = new jsPDF();
+  img.onload = function () {
 
-// ======================================================
-// CALCUL TOTAL HEURES
-// ======================================================
+    var driver = modalDriver;
+    if (!driver) return;
 
-var endedS = shifts.filter(function (s) {
-  return s.shift_end;
-});
+    var shifts = filterShiftsByPeriod(modalShifts, _selectedPeriod);
 
-var totalMinutes = endedS.reduce(function (a, s) {
-  return a + Math.round(
-    (new Date(s.shift_end) - new Date(s.shift_start)) / 60000
-  );
-}, 0);
+    var jsPDF = window.jspdf.jsPDF;
+    var doc = new jsPDF();
 
-var totalHours = Math.floor(totalMinutes / 60);
-var remainingMinutes = totalMinutes % 60;
+    // ======================================================
+    // CALCUL TOTAL
+    // ======================================================
 
-var totalH = totalHours + 'h ' + remainingMinutes + 'min';
+    var endedS = shifts.filter(function (s) {
+      return s.shift_end;
+    });
 
-// ======================================================
-// LOGO PIQLA
-// ======================================================
+    var totalMinutes = endedS.reduce(function (a, s) {
+      return a + Math.round(
+        (new Date(s.shift_end) - new Date(s.shift_start)) / 60000
+      );
+    }, 0);
 
-// Si logo chargé ailleurs :
-// doc.addImage(logoBase64, 'PNG', 14, 10, 24, 24);
+    var totalHours = Math.floor(totalMinutes / 60);
+    var remainingMinutes = totalMinutes % 60;
 
-// ======================================================
-// TITRE
-// ======================================================
+    var totalH = totalHours + 'h ' + remainingMinutes + 'min';
 
-doc.setTextColor(8, 16, 40);
+    // ======================================================
+    // LOGO PIQLA
+    // ======================================================
 
-doc.setFontSize(20);
-doc.setFont(undefined, 'bold');
-doc.text(driver.full_name, 105, 20, { align: 'center' });
+    doc.addImage(img, 'PNG', 14, 10, 22, 22);
 
-doc.setFontSize(10);
-doc.setFont(undefined, 'normal');
-doc.setTextColor(120);
+    // ======================================================
+    // TITRE CENTRÉ
+    // ======================================================
 
-doc.text(
-  'Rapport de présence chauffeur',
-  105,
-  27,
-  { align: 'center' }
-);
+    doc.setTextColor(8, 16, 40);
 
-// ======================================================
-// BLOC RÉSUMÉ
-// ======================================================
+    doc.setFontSize(18);
+    doc.setFont(undefined, 'bold');
+    doc.text(driver.full_name, 105, 18, { align: 'center' });
 
-doc.setFillColor(248, 248, 248);
-doc.roundedRect(14, 35, 182, 38, 2, 2, 'F');
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(120);
 
-doc.autoTable({
-  startY: 40,
-
-  body: [
-    ['Téléphone', driver.phone || '—'],
-    ['Matricule', driver.matricule || '—'],
-    ['Expiration médicale', driver.medical_expiration || '—'],
-    ['Période', periodLabel()],
-    ['Nombre de shifts', shifts.length],
-    ['Heures travaillées', totalH]
-  ],
-
-  theme: 'plain',
-
-  columnStyles: {
-    0: {
-      fontStyle: 'bold',
-      cellWidth: 55
-    },
-    1: {
-      cellWidth: 100
-    }
-  },
-
-  styles: {
-    fontSize: 9,
-    cellPadding: 1,
-    lineWidth: 0,
-    textColor: [40, 40, 40]
-  }
-});
-
-// ======================================================
-// MISE EN VALEUR DU TOTAL
-// ======================================================
-
-var infoBottom = doc.lastAutoTable.finalY;
-
-doc.setFont(undefined, 'bold');
-doc.setFontSize(12);
-doc.setTextColor(236, 169, 0);
-
-doc.text(
-  'Total travaillé : ' + totalH,
-  14,
-  infoBottom + 10
-);
-
-// ======================================================
-// SÉPARATEUR
-// ======================================================
-
-var y = infoBottom + 16;
-
-doc.setDrawColor(236, 169, 0);
-doc.setLineWidth(1);
-doc.line(14, y, 196, y);
-
-// ======================================================
-// TABLEAU DES SHIFTS
-// ======================================================
-
-var rows = shifts.map(function (s) {
-
-  var dur = '—';
-
-  if (s.shift_end) {
-
-    var shiftMinutes = Math.round(
-      (new Date(s.shift_end) - new Date(s.shift_start)) / 60000
+    doc.text(
+      'Rapport de présence chauffeur',
+      105,
+      25,
+      { align: 'center' }
     );
 
-    var hours = Math.floor(shiftMinutes / 60);
-    var minutes = shiftMinutes % 60;
+    // ======================================================
+    // BLOC RÉSUMÉ (CLEAN UI)
+    // ======================================================
 
-    dur = hours + 'h ' + minutes + 'min';
-  }
+    doc.setFillColor(245, 245, 245);
+    doc.roundedRect(14, 32, 182, 34, 2, 2, 'F');
 
-  return [
-    formatDate(s.shift_start),
-    formatTime(s.shift_start),
-    s.shift_end ? formatDate(s.shift_end) : 'EN COURS',
-    s.shift_end ? formatTime(s.shift_end) : '—',
-    dur,
-    s.status
-  ];
-});
+    doc.autoTable({
+      startY: 36,
 
-doc.autoTable({
-  startY: y + 6,
+      body: [
+        ['Téléphone', driver.phone || '—'],
+        ['Matricule', driver.matricule || '—'],
+        ['Expiration médicale', driver.medical_expiration || '—'],
+        ['Période', periodLabel()],
+        ['Shifts', shifts.length],
+        ['Total travaillé', totalH]
+      ],
 
-  head: [[
-    'Date début',
-    'Heure début',
-    'Date fin',
-    'Heure fin',
-    'Durée',
-    'Statut'
-  ]],
+      theme: 'plain',
 
-  body: rows.length
-    ? rows
-    : [['—', '—', '—', '—', '—', 'Aucun shift']],
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 50 },
+        1: { cellWidth: 95 }
+      },
 
-  theme: 'striped',
+      styles: {
+        fontSize: 9,
+        cellPadding: 1.2,
+        textColor: [40, 40, 40]
+      }
+    });
 
-  headStyles: {
-    fillColor: [8, 16, 40],
-    textColor: [255, 255, 255],
-    fontStyle: 'bold',
-    fontSize: 8
-  },
+    var infoBottom = doc.lastAutoTable.finalY;
 
-  alternateRowStyles: {
-    fillColor: [248, 248, 248]
-  },
+    // ======================================================
+    // TOTAL MIS EN AVANT
+    // ======================================================
 
-  styles: {
-    fontSize: 8,
-    cellPadding: 1.5,
-    valign: 'middle'
-  }
-});
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(236, 169, 0);
 
-// ======================================================
-// PIED DE PAGE
-// ======================================================
+    doc.text(
+      'Total travaillé : ' + totalH,
+      14,
+      infoBottom + 8
+    );
 
-var pageHeight = doc.internal.pageSize.height;
+    // ======================================================
+    // SEPARATEUR
+    // ======================================================
 
-doc.setDrawColor(220);
-doc.setLineWidth(0.2);
-doc.line(14, pageHeight - 15, 196, pageHeight - 15);
+    var y = infoBottom + 14;
 
-doc.setFontSize(8);
-doc.setTextColor(120);
+    doc.setDrawColor(236, 169, 0);
+    doc.setLineWidth(1);
+    doc.line(14, y, 196, y);
 
-doc.text(
-  'Rapport généré le ' +
-  formatDateTime(new Date()) +
-  ' • ' +
-  periodLabel(),
-  14,
-  pageHeight - 8
-);
+    // ======================================================
+    // TABLEAU SHIFTS
+    // ======================================================
 
-doc.text(
-  'Piqla Driver Management',
-  196,
-  pageHeight - 8,
-  { align: 'right' }
-);
+    var rows = shifts.map(function (s) {
 
-// ======================================================
-// SAUVEGARDE
-// ======================================================
+      var dur = '—';
 
-var safeName = driver.full_name
+      if (s.shift_end) {
+
+        var shiftMinutes = Math.round(
+          (new Date(s.shift_end) - new Date(s.shift_start)) / 60000
+        );
+
+        var hours = Math.floor(shiftMinutes / 60);
+        var minutes = shiftMinutes % 60;
+
+        dur = hours + 'h ' + minutes + 'min';
+      }
+
+      return [
+        formatDate(s.shift_start),
+        formatTime(s.shift_start),
+        s.shift_end ? formatDate(s.shift_end) : 'EN COURS',
+        s.shift_end ? formatTime(s.shift_end) : '—',
+        dur,
+        s.status
+      ];
+    });
+
+    doc.autoTable({
+      startY: y + 6,
+
+      head: [[
+        'Date début',
+        'Heure début',
+        'Date fin',
+        'Heure fin',
+        'Durée',
+        'Statut'
+      ]],
+
+      body: rows.length
+        ? rows
+        : [['—', '—', '—', '—', '—', 'Aucun shift']],
+
+      theme: 'striped',
+
+      headStyles: {
+        fillColor: [8, 16, 40],
+        textColor: [255, 255, 255],
+        fontSize: 8
+      },
+
+      alternateRowStyles: {
+        fillColor: [248, 248, 248]
+      },
+
+      styles: {
+        fontSize: 8,
+        cellPadding: 1.2,
+        valign: 'middle'
+      }
+    });
+
+    // ======================================================
+    // FOOTER PROPRE
+    // ======================================================
+
+    var pageHeight = doc.internal.pageSize.height;
+
+    doc.setDrawColor(220);
+    doc.line(14, pageHeight - 14, 196, pageHeight - 14);
+
+    doc.setFontSize(8);
+    doc.setTextColor(120);
+
+    doc.text(
+      'Rapport généré le ' +
+      formatDateTime(new Date()) +
+      ' • ' +
+      periodLabel(),
+      14,
+      pageHeight - 8
+    );
+
+    doc.text(
+      'Piqla Driver Management',
+      196,
+      pageHeight - 8,
+      { align: 'right' }
+    );
+
+    // ======================================================
+    // SAVE FILE
+    // ======================================================
+
+    var safeName = driver.full_name
   .replace(/[^a-z0-9_\- ]/gi, '_')
   .trim();
 
-doc.save(
+var fileName =
   'fiche_' +
   safeName +
   '_' +
   periodLabel().replace(/\s+/g, '_') +
   '_' +
   getLocalFileDate() +
-  '.pdf'
-);
+  '.pdf';
 
-showToast('PDF téléchargé ✓', 'success');
+// TOAST AVANT SAVE (plus fiable)
+showToast('Génération PDF en cours ✓', 'success');
+
+// SAVE
+doc.save(fileName);
+
+// TOAST FINAL (avec petit delay)
+setTimeout(function () {
+  showToast('PDF téléchargé ✓', 'success');
+}, 300);
 // =================================================================
 // EXCEL — FICHE CHAUFFEUR
 // Dates affichées → formatDate/formatTime (UTC+3 Madagascar)
