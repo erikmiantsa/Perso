@@ -88,6 +88,9 @@
       <button class="nav-item admin-only hidden" onclick="showSection('addDriver', this)">
         <span class="nav-icon">➕</span> Ajouter chauffeur
       </button>
+      <button class="nav-item admin-only hidden" onclick="showSection('csv', this)">
+        <span class="nav-icon">⏸</span> CSV Report
+      </button>
       <button class="nav-item admin-only hidden" onclick="showSection('suspended', this)">
         <span class="nav-icon">⏸</span> Suspendus
       </button>
@@ -232,7 +235,7 @@
   </main>
 
   <!-- PANNEAU DROIT — EXPORT -->
-  <aside class="right-panel">
+  <section id="csv" class="right-panel">
     <div class="export-title">📤 Export Shifts</div>
 
     <label class="export-label">Date de début</label>
@@ -253,7 +256,7 @@
         <div>🗑 Supprimer définitivement</div>
       </div>
     </div>
-  </aside>
+  </section>
 <script src="app.js?v=4"></script>
 </body>
 </html>
