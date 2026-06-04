@@ -912,73 +912,128 @@ function closeModal() {
 // Nom de fichier   → getLocalFileDate() (pas toISOString)
 // =================================================================
 function downloadDriverPDF() {
-  var driver = modalDriver;
-  if (!driver) return;
-  var shifts  = filterShiftsByPeriod(modalShifts, _selectedPeriod);
-  var jsPDF   = window.jspdf.jsPDF;
-  var doc     = new jsPDF();
-  var endedS  = shifts.filter(function (s) { return s.shift_end; });
-  var totalH  = endedS.reduce(function (a, s) {
-    return a + (new Date(s.shift_end) - new Date(s.shift_start)) / 3600000;
-  }, 0).toFixed(1);
+ var driver = modalDriver;
+if (!driver) return;
 
-  doc.setFillColor(8, 16, 40); doc.rect(0, 0, 210, 38, 'F');
-  doc.setTextColor(236, 169, 0); doc.setFontSize(20);
-  doc.text('FICHE CHAUFFEUR', 105, 18, { align: 'center' });
-  doc.setTextColor(255, 255, 255); doc.setFontSize(13);
-  doc.text(driver.full_name, 105, 30, { align: 'center' });
+var shifts = filterShiftsByPeriod(modalShifts, _selectedPeriod);
+var jsPDF = window.jspdf.jsPDF;
+var doc = new jsPDF();
 
-  doc.setTextColor(0, 0, 0);
-  doc.autoTable({
-    startY: 45,
-    body: [
-      ['Nom complet',          driver.full_name],
-      ['Téléphone',            driver.phone || '—'],
-      ['Matricule',            driver.matricule || '—'],
-      ['Expiration médicale',  driver.medical_expiration],
-      // formatDate → APP_TIMEZONE
-      ['Enregistré le',        formatDate(driver.created_at)],
-      ['Période',              periodLabel()],
-      ['Shifts inclus',        shifts.length],
-      ['Heures travaillées',   totalH + 'h']
-    ],
-    theme: 'plain',
-    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 55 }, 1: { cellWidth: 100 } },
-    styles: { fontSize: 10, cellPadding: 3 }
-  });
+var endedS = shifts.filter(function (s) {
+  return s.shift_end;
+});
 
-  var y = doc.lastAutoTable.finalY + 8;
-  doc.setFillColor(236, 169, 0); doc.rect(14, y, 182, 12, 'F');
-  doc.setTextColor(8, 16, 40); doc.setFontSize(9);
-  // ← formatDateTime() → heure locale Madagascar
-  doc.text('Rapport généré le ' + formatDateTime(new Date()) + '  —  ' + periodLabel(), 19, y + 8);
+// Total travaillé en heures + minutes
+var totalMinutes = endedS.reduce(function (a, s) {
+  return a + Math.round(
+    (new Date(s.shift_end) - new Date(s.shift_start)) / 60000
+  );
+}, 0);
 
-  var rows = shifts.map(function (s) {
-    var dur = s.shift_end
-      ? Math.round((new Date(s.shift_end) - new Date(s.shift_start)) / 60000) + ' min'
-      : '—';
-    // formatDate / formatTime → APP_TIMEZONE
-    return [
-      formatDate(s.shift_start), formatTime(s.shift_start),
-      s.shift_end ? formatDate(s.shift_end) : 'EN COURS',
-      s.shift_end ? formatTime(s.shift_end) : '—',
-      dur, s.status
-    ];
-  });
-  doc.autoTable({
-    startY: y + 18,
-    head: [['Date deb.', 'Heure deb.', 'Date fin', 'Heure fin', 'Durée', 'Statut']],
-    body: rows.length ? rows : [['—', '—', '—', '—', '—', 'Aucun shift']],
-    theme: 'striped',
-    headStyles: { fillColor: [236, 169, 0], textColor: [8, 16, 40], fontStyle: 'bold' },
-    styles: { fontSize: 8, cellPadding: 2 }
-  });
+var totalHours = Math.floor(totalMinutes / 60);
+var remainingMinutes = totalMinutes % 60;
+var totalH = totalHours + 'h ' + remainingMinutes + 'min';
 
-  // ← Nom de fichier avec date locale Madagascar
-  var safeName = driver.full_name.replace(/[^a-z0-9_\- ]/gi, '_').trim();
-  doc.save('fiche_' + safeName + '_' + periodLabel().replace(/\s+/g, '_') + '_' + getLocalFileDate() + '.pdf');
-  showToast('PDF téléchargé ✓', 'success');
-}
+doc.setTextColor(0, 0, 0);
+
+doc.autoTable({
+  startY: 45,
+  body: [
+    ['Nom complet', driver.full_name],
+    ['Téléphone', driver.phone || '—'],
+    ['Matricule', driver.matricule || '—'],
+    ['Expiration médicale', driver.medical_expiration],
+    ['Période', periodLabel()],
+    ['Shifts inclus', shifts.length],
+    ['Heures travaillées', totalH]
+  ],
+  theme: 'plain',
+  columnStyles: {
+    0: { fontStyle: 'bold', cellWidth: 55 },
+    1: { cellWidth: 100 }
+  },
+  styles: {
+    fontSize: 10,
+    cellPadding: 3
+  }
+});
+
+var y = doc.lastAutoTable.finalY + 8;
+
+doc.setFillColor(236, 169, 0);
+doc.rect(14, y, 182, 12, 'F');
+
+doc.setTextColor(8, 16, 40);
+doc.setFontSize(9);
+
+doc.text(
+  'Rapport généré le ' +
+    formatDateTime(new Date()) +
+    '  —  ' +
+    periodLabel(),
+  19,
+  y + 8
+);
+
+var rows = shifts.map(function (s) {
+
+  var dur = '—';
+
+  if (s.shift_end) {
+    var shiftMinutes = Math.round(
+      (new Date(s.shift_end) - new Date(s.shift_start)) / 60000
+    );
+
+    var hours = Math.floor(shiftMinutes / 60);
+    var minutes = shiftMinutes % 60;
+
+    dur = hours + 'h ' + minutes + 'min';
+  }
+
+  return [
+    formatDate(s.shift_start),
+    formatTime(s.shift_start),
+    s.shift_end ? formatDate(s.shift_end) : 'EN COURS',
+    s.shift_end ? formatTime(s.shift_end) : '—',
+    dur,
+    s.status
+  ];
+});
+
+doc.autoTable({
+  startY: y + 18,
+  head: [['Date deb.', 'Heure deb.', 'Date fin', 'Heure fin', 'Durée', 'Statut']],
+  body: rows.length
+    ? rows
+    : [['—', '—', '—', '—', '—', 'Aucun shift']],
+  theme: 'striped',
+  headStyles: {
+    fillColor: [236, 169, 0],
+    textColor: [8, 16, 40],
+    fontStyle: 'bold'
+  },
+  styles: {
+    fontSize: 8,
+    cellPadding: 2
+  }
+});
+
+// Nom de fichier avec date locale Madagascar
+var safeName = driver.full_name
+  .replace(/[^a-z0-9_\- ]/gi, '_')
+  .trim();
+
+doc.save(
+  'fiche_' +
+    safeName +
+    '_' +
+    periodLabel().replace(/\s+/g, '_') +
+    '_' +
+    getLocalFileDate() +
+    '.pdf'
+);
+
+showToast('PDF téléchargé ✓', 'success');
 
 // =================================================================
 // EXCEL — FICHE CHAUFFEUR
