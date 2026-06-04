@@ -896,23 +896,54 @@ function _lastDay(y,m) { return new Date(y, m, 0).getDate(); } // dernier jour d
 
 function periodLabel() {
 
+  var months = [
+    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+  ];
+
+  var now = new Date();
+  var currentMonth = now.getMonth();
+  var currentYear = now.getFullYear();
+
   var labels = {
-    all: 'Tous les shifts',
-    prev_month: 'Mois précédent',
-    year: 'Cette année',
-    prev_year: 'Année précédente'
+    all: 'Tous les shifts'
   };
 
+  // ======================================================
+  // MOIS ACTUEL
+  // ======================================================
   if (_selectedPeriod === 'month') {
-    var months = [
-      'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-      'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
-    ];
-
-    var now = new Date();
-    return months[now.getMonth()];
+    return months[currentMonth] + ' ' + currentYear;
   }
 
+  // ======================================================
+  // MOIS PRÉCÉDENT
+  // ======================================================
+  if (_selectedPeriod === 'prev_month') {
+
+    var d = new Date();
+    d.setMonth(d.getMonth() - 1);
+
+    return months[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  // ======================================================
+  // ANNÉE ACTUELLE
+  // ======================================================
+  if (_selectedPeriod === 'year') {
+    return 'Année ' + currentYear;
+  }
+
+  // ======================================================
+  // ANNÉE PRÉCÉDENTE
+  // ======================================================
+  if (_selectedPeriod === 'prev_year') {
+    return 'Année ' + (currentYear - 1);
+  }
+
+  // ======================================================
+  // DEFAULT
+  // ======================================================
   return labels[_selectedPeriod] || 'Tous les shifts';
 }
 
@@ -966,7 +997,7 @@ function downloadDriverPDF() {
     // LOGO PIQLA
     // ======================================================
 
-    doc.addImage(img, 'PNG', 14, 10, 150, 42);
+    doc.addImage(img, 'PNG', 14, 10, 59, 22);
 
     // ======================================================
     // TITRE
