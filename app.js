@@ -1351,7 +1351,7 @@ function exportShiftsPDF() {
 
     doc.autoTable({
       startY: 50,
-      head: [['Chauffeur', 'Téléphone', 'Matricule',
+      head: [['Chauffeur', 'Email', 'Matricule',
               'Date deb.', 'Heure deb.', 'Date fin', 'Heure fin', 'Durée', 'Statut']],
       body: rows,
       theme: 'striped',
@@ -1386,7 +1386,7 @@ function exportShiftsCSV() {
     if (!r.data || !r.data.length)    { showToast('Aucune donnée à exporter', 'error'); return; }
 
     var SEP  = ';';  // séparateur FR pour Excel
-    var rows = [['Chauffeur', 'Téléphone', 'Matricule',
+    var rows = [['Chauffeur', 'Email', 'Matricule',
                  'Date début', 'Heure début', 'Date fin', 'Heure fin',
                  'Durée (min)', 'Statut']];
 
