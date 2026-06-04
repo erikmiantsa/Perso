@@ -983,13 +983,12 @@ function downloadDriverPDF() {
       startY: 36,
 
       body: [
-        ['Téléphone', driver.phone || '—'],
         ['Matricule', driver.matricule || '—'],
+        ['Téléphone', driver.phone || '—'],
         ['Expiration médicale', driver.medical_expiration || '—'],
         ['Période', periodLabel()],
         ['Shifts', shifts.length],
-        ['Total travaillé', totalH]
-      ],
+        
 
       theme: 'plain',
 
@@ -1017,7 +1016,7 @@ function downloadDriverPDF() {
 
     doc.text(
       'Total travaillé : ' + totalH,
-      14,
+      13,
       infoBottom + 8
     );
 
