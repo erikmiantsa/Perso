@@ -89,7 +89,7 @@
         <span class="nav-icon">➕</span> Ajouter chauffeur
       </button>
       <button class="nav-item admin-only hidden" onclick="showSection('csv', this)">
-        <span class="nav-icon">⏸</span> CSV Report
+        <span class="nav-icon">📑</span> CSV Report
       </button>
       <button class="nav-item admin-only hidden" onclick="showSection('suspended', this)">
         <span class="nav-icon">⏸</span> Suspendus
@@ -212,6 +212,29 @@
         <button class="primary add-submit-btn" onclick="addDriver()">✓ Enregistrer le chauffeur</button>
       </div>
     </section>
+    <!--EXPORT -->
+  <section id="csv" class="section hidden">
+    <div class="export-title">📤 Export Shifts</div>
+    <div class="card add-form-card">
+    <label class="export-label">Date de début</label>
+    <input id="startDate" type="date" />
+    <label class="export-label">Date de fin</label>
+    <input id="endDate"   type="date" />
+
+    <button class="primary export-btn" onclick="exportShiftsPDF()">📄 Exporter PDF</button>
+    <button class="export-btn-csv export-btn" onclick="exportShiftsCSV()">📊 Exporter CSV</button>
+    </div>
+    <div class="legend-block">
+      <div class="export-title" style="margin-bottom:10px;">ℹ️ Légende</div>
+      <div class="shortcut-list">
+        <div>🟢 Shift actif / Médical OK</div>
+        <div>🟡 Médical expire &lt; 30j</div>
+        <div>🔴 Médical expiré</div>
+        <div>⏸ Suspendre un chauffeur</div>
+        <div>🗑 Supprimer définitivement</div>
+      </div>
+    </div>
+  </section>
 
     <!-- SUSPENDUS (admin) -->
     <section id="suspended" class="section hidden">
@@ -234,29 +257,7 @@
 
   </main>
 
-  <!-- PANNEAU DROIT — EXPORT -->
-  <section id="csv" class="right-panel">
-    <div class="export-title">📤 Export Shifts</div>
-
-    <label class="export-label">Date de début</label>
-    <input id="startDate" type="date" />
-    <label class="export-label">Date de fin</label>
-    <input id="endDate"   type="date" />
-
-    <button class="primary export-btn" onclick="exportShiftsPDF()">📄 Exporter PDF</button>
-    <button class="export-btn-csv export-btn" onclick="exportShiftsCSV()">📊 Exporter CSV</button>
-
-    <div class="legend-block">
-      <div class="export-title" style="margin-bottom:10px;">ℹ️ Légende</div>
-      <div class="shortcut-list">
-        <div>🟢 Shift actif / Médical OK</div>
-        <div>🟡 Médical expire &lt; 30j</div>
-        <div>🔴 Médical expiré</div>
-        <div>⏸ Suspendre un chauffeur</div>
-        <div>🗑 Supprimer définitivement</div>
-      </div>
-    </div>
-  </section>
+  
 <script src="app.js?v=4"></script>
 </body>
 </html>
