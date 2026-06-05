@@ -475,9 +475,9 @@ function renderDriverTable(result) {
 
         var tr = document.createElement('tr');
         tr.innerHTML =
+          '<td>' + escHtml(driver.matricule || '—') + '</td>' +
           '<td><strong>' + escHtml(driver.full_name) + '</strong></td>' +
           '<td>' + escHtml(driver.phone || '—') + '</td>' +
-          '<td>' + escHtml(driver.matricule || '—') + '</td>' +
           '<td class="' + (expired ? 'expired' : '') + '">' + escHtml(driver.medical_expiration) + '</td>' +
           '<td><span class="badge ' + (active ? 'badge-on' : 'badge-off') + '">' +
             (active ? 'ON SHIFT' : 'OFF SHIFT') +
