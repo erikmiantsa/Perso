@@ -61,10 +61,14 @@ body {
   margin-bottom: 28px;
   font-size: 13px;
 }
-.login-box input {
+.login-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* espace entre les inputs */
+}
+
+.login-fields input {
   width: 100%;
-  display: block;
-  margin-bottom: 12px;
   box-sizing: border-box;
 }
 .login-box .login-submit {
