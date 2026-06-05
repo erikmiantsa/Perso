@@ -1211,9 +1211,9 @@ function downloadDriverExcel() {
   }, 0).toFixed(1);
 
   var ws1 = XLSX.utils.json_to_sheet([
+    { Champ: 'Matricule',            Valeur: driver.matricule || '' },
     { Champ: 'Nom complet',          Valeur: driver.full_name },
     { Champ: 'Email',            Valeur: driver.phone || '' },
-    { Champ: 'Matricule',            Valeur: driver.matricule || '' },
     { Champ: 'Expiration médicale',  Valeur: driver.medical_expiration },
     // formatDate → APP_TIMEZONE
     { Champ: 'Enregistré le',        Valeur: formatDate(driver.created_at) },
