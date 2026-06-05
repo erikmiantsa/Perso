@@ -61,7 +61,12 @@ body {
   margin-bottom: 28px;
   font-size: 13px;
 }
-.login-box input { width: 100%; margin: 6px 10px; display: block; }
+.login-box input {
+  width: 100%;
+  display: block;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
 .login-box .login-submit {
   width: 100%;
   margin: 20px 0 0;
