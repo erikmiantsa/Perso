@@ -997,7 +997,7 @@ function downloadDriverPDF() {
     // LOGO PIQLA
     // ======================================================
 
-    doc.addImage(img, 'PNG', 14, 10, 29, 12);
+    doc.addImage(img, 'PNG', 14, 10, 25, 25);
 
     // ======================================================
     // TITRE
@@ -1014,7 +1014,7 @@ function downloadDriverPDF() {
     doc.setTextColor(120);
 
     doc.text(
-      'Rapport de présence chauffeur',
+      'Fiche de présence chauffeur',
       105,
       25,
       { align: 'center' }
